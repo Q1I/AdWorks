@@ -8,6 +8,14 @@ File_Queries::File_Queries(std::vector<std::string> f) {
 
 }
 
+File_Queries::File_Queries(std::string adId, std::string phrases,std::string offer) {
+    //    std::cout << "New File_Ads: " << f.at(0) << " " <<f.at(1)  << " " << f.at(2)  << " " << f.at(3) << " " << f.at(4)  << " " << f.at(5) << " " << f.at(6)  << " " << f.at(7) << std::endl;
+    this->adId = adId;
+    this->phrases = phrases;
+    this->offer = offer;
+
+}
+
 std::string File_Queries::remove(std::string str) {
 
     char c = '"';
