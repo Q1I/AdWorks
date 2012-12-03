@@ -61,6 +61,9 @@ public:
         // Get QueryResult
         ad = getAd(atoi(fq_ad.adId.c_str()));
 
+        // Increment Impressions
+        incImpressions(atoi(fq_ad.adId.c_str()));
+        
         conn.disconnect();
 
         return ad;
@@ -256,6 +259,11 @@ public:
         return (double) offer;
     }
 
+    /**
+     * Returns ad as IQueryResult
+     * @param adId
+     * @return ad
+     */
     IQueryResult getAd(int adId) {
         std::cout << "##GetAd: adId = " << adId << std::endl;
         std::string title, creative;
@@ -278,6 +286,15 @@ public:
         return a;
     }
 
+    void incImpressions(int adId){
+        std::string id = boost::lexical_cast<std::string > (adId);
+        std::cout << "##Increment Impressions: adId = " << id << std::endl;
+        std::string q = "UPDATE Ads SET `Anzahl Impressions`=`Anzahl Impressions`+1 WHERE AdID=" + id;
+        mysqlpp::Query query = conn.query(q);
+        mysqlpp::SimpleResult res = query.execute();
+        cout << "Info: " << res.info() << std::endl;
+    }
+    
     std::string getAdURL(uint32_t adID) {
         std::string id = boost::lexical_cast<std::string > (adID); // int to string cast
         std::string q = "Select URL from Ads where AdID=" + id;
