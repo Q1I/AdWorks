@@ -25,6 +25,7 @@ public:
 
 class BackEnd : public IBackEnd {
 public:
+    // Connection to mysql database
     mysqlpp::Connection conn;
 
     IQueryResult matchAdRewrites(std::list<std::string> rewriteList, const IUser* user = NULL, bool* foundAd = NULL) {
@@ -219,22 +220,6 @@ public:
         return url;
     };
 
-    bool connect() {
-        std::cout << "Open Connection ..." << std::endl;
-        try {
-            if (conn.connect("CA", "localhost", "root", "root"))
-                std::cout << "Connection success." << std::endl;
-            else {
-                std::cout << "Connection failed." << std::endl;
-                return -1;
-            }
-        } catch (mysqlpp::Exception e) {
-            cerr << "problem: " << e.what() << endl;
-            return -1;
-        }
-        return true;
-    };
-
     bool initDatabase(const std::string& adFile, const std::string& bidPhraseFile) {
         using namespace boost;
 
@@ -242,6 +227,7 @@ public:
         // Get Connection to mysql
         if (!connect())
             return false;
+        
         // AD file
         std::cout << "Ad File: " << adFile << std::endl;
         ifstream myfile;
@@ -253,7 +239,7 @@ public:
             while (myfile.good()) {
                 std::cout << "Get Line" << std::endl;
                 getline(myfile, line);
-                // Split line, save elements into fields
+                // Split line delimiter='\t', save elements into fields
                 std::cout << "split... " << std::endl;
                 boost::split(fields, line, is_any_of("\t"));
                 std::cout << "field.size: " << fields.size() << std::endl;
@@ -280,7 +266,7 @@ public:
             while (myfile.good()) {
                 std::cout << "Get Line" << std::endl;
                 getline(myfile, line);
-                // Split line, save elements into fields
+                // Split line delimiter='\t', save elements into fields
                 std::cout << "split... " << std::endl;
                 boost::split(fields, line, is_any_of("\t"));
                 std::cout << "field.size: " << fields.size() << std::endl;
@@ -302,6 +288,30 @@ public:
         return true;
     };
 
+    /** 
+     * Connect to database 
+     * @return connecting-> success or fail
+     */
+    bool connect() {
+        std::cout << "Open Connection ..." << std::endl;
+        try {
+            if (conn.connect("CA", "localhost", "root", "root"))
+                std::cout << "Connection success." << std::endl;
+            else {
+                std::cout << "Connection failed." << std::endl;
+                return -1;
+            }
+        } catch (mysqlpp::Exception e) {
+            cerr << "problem: " << e.what() << endl;
+            return -1;
+        }
+        return true;
+    };
+    
+    /**
+     * Execute insert query.
+     * @param q insert statement
+     */
     void dbInsert(std::string q) {
         std::cout << "dbInsert: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
