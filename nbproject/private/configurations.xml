@@ -24,8 +24,6 @@
       </nativedebugger>
       <runprofile version="9">
         <runcommandpicklist>
-          <runcommandpicklistitem>"${OUTPUT_PATH}" "reload" "resource/ads.csv" "resource/bid.csv"</runcommandpicklistitem>
-          <runcommandpicklistitem>"${OUTPUT_PATH}" "reload" "resource/ads.csv" "resource/bid_phrases.csv"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" "visit" "1"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q schiffe"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q schiffe" "-a old"</runcommandpicklistitem>
@@ -34,8 +32,10 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zug" "-a old" "-g male"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zUG" "-a old" "-g male"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zUG" "-q tablet" "-a old" "-g male"</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zUG" "-q tablet" "-a young" "-g male"</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zUG" "-q tablet" "-a na" "-g na"</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zUG" "-q tablet" "-a old" "-g male"</runcommand>
+        <runcommand>"${OUTPUT_PATH}" "matchad" "-q Bahn" "-q zUG" "-q tablet" "-a na" "-g na"</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

@@ -39,7 +39,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/File_Ads.o \
 	${OBJECTDIR}/IQueryResult.o \
-	${OBJECTDIR}/File_Queries.o
+	${OBJECTDIR}/File_Queries.o \
+	${OBJECTDIR}/IUser.o
 
 
 # C Compiler Flags
@@ -92,6 +93,11 @@ ${OBJECTDIR}/File_Queries.o: File_Queries.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Queries.o File_Queries.cpp
+
+${OBJECTDIR}/IUser.o: IUser.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IUser.o IUser.cpp
 
 # Subprojects
 .build-subprojects:

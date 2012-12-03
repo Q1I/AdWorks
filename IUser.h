@@ -7,6 +7,13 @@
 
 #ifndef IUSER_H
 #define	IUSER_H
+
+#include <fstream>
+#include <mysql++.h>
+#include <algorithm>    // copy
+#include <iterator>     // ostream_operator
+#include <list>   
+
 enum Gender {
     GENDER_NA, GENDER_MALE, GENDER_FEMALE
 };
@@ -16,13 +23,16 @@ enum Age {
 };
 
 class IUser {
+private:
+    Gender gender;
+    Age age;
+    std::list<std::string> browsingHistory;
 public:
-    virtual Gender getGender() const = 0;
-    virtual Age getAge() const = 0;
-    virtual std::list<std::string> getBrowsingHistory() const = 0;
+    IUser(Gender,Age);
+    Gender getGender();
+    Age getAge();
+    std::list<std::string> getBrowsingHistory();
 };
-
-
 
 #endif	/* IUSER_H */
 

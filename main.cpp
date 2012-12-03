@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <iterator>
 #include "IBackEnd.cpp"
+#include "IUser.h"
+
 //"reload" "resource/ads.csv" "resource/bid_phrases.csv"
 
 void reload(int argc, char **argv) {
@@ -80,16 +82,37 @@ void matchad(int argc, char **argv) {
     std::cout << "gender: " << gender << std::endl;
     std::cout << "queries: " << queries.size() << std::endl;
     
+    Age a;
+    Gender g;
+    // User
+    if(age == "na")
+        a=AGE_NA;
+    else if(age == "old")
+        a=AGE_OLD;
+    else if (age == "young")
+        a=AGE_YOUNG;
+    else if (age == "teen")
+        a=AGE_TEEN;
+    if(gender == "male")
+        g=GENDER_MALE;
+    else if (gender =="female")
+        g=GENDER_FEMALE;
+    else if (gender == "na")
+        g=GENDER_NA;
+    
+    IUser user(g,a);
     BackEnd b;
-    b.matchAdRewrites(queries,NULL,NULL);
+    b.matchAdRewrites(queries,user,NULL);
 }
 
 int main(int argc, char **argv) {
+    std::cout<<"==================="<<std::endl;
     std::string reloadStr = "reload";
     std::string visitStr = "visit";
     std::string matchadStr = "matchad";
     if (argc > 1) {
-        std::cout << std::endl << "Arguments:" << std::endl;
+        std::cout << "Checking command .. "<<std::endl;
+//        std::cout << std::endl << "Print Arguments:" << std::endl;
         //        for (int i = 1; i < argc; i++) {
         //            std::cout << i << ": " << argv[i] << std::endl;
         if (argv[1] == reloadStr) {
