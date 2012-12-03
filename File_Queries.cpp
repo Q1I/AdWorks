@@ -16,6 +16,8 @@ File_Queries::File_Queries(std::string adId, std::string phrases,std::string off
 
 }
 
+File_Queries::File_Queries() {}
+
 std::string File_Queries::remove(std::string str) {
 
     char c = '"';

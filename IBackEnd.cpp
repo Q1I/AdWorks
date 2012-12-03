@@ -16,7 +16,7 @@ using namespace std;
 class IBackEnd {
 public:
     // siehe: IFrontEnd::matchAd
-    virtual IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, const IUser* user = NULL, bool* foundAd = NULL) = 0;
+    virtual IQueryResult matchAdRewrites(std::list<std::string> rewriteList, const IUser* user = NULL, bool* foundAd = NULL) = 0;
     // siehe: IFrontEnd::getAdURL
     virtual std::string getAdURL(uint32_t adID) = 0;
     // Datenbank mit Ads und Bid Phrases initialisieren
@@ -27,68 +27,84 @@ class BackEnd : public IBackEnd {
 public:
     mysqlpp::Connection conn;
 
-    IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, const IUser* user = NULL, bool* foundAd = NULL) {
+    IQueryResult matchAdRewrites(std::list<std::string> rewriteList, const IUser* user = NULL, bool* foundAd = NULL) {
         std::cout << "######MatchAdRewrites" << std::endl;
         std::string q;
-        std::set<int> matchingAds;
-
+        std::vector<File_Queries> matchingAds;
+        IQueryResult ad;
+        
         // Connect to db
-        if (!this->connect())
-            return false;
-
+        if (!this->connect()){
+            return ad;
+        }
         // Matching
         for (std::list<std::string>::const_iterator iterator = rewriteList.begin(), end = rewriteList.end(); iterator != end; ++iterator) {
             q = *iterator;
             // Match with bid phrase
-            std::set<int> match = matching(q);
-            // Merge set
-            matchingAds.insert(match.begin(), match.end());
+            std::vector<File_Queries> match = matching(q);
+            matchingAds.insert(matchingAds.end(), match.begin(), match.end());
         }
         cout << ">>Found " << matchingAds.size() << " matched ads" << std::endl;
 
         // Ranking
-        ranking(matchingAds);
+        File_Queries fq_ad = ranking(matchingAds);
+
+        // Get QueryResult
+        ad = getAd(atoi(fq_ad.adId.c_str()));
 
         conn.disconnect();
 
-        return NULL;
+        return ad;
     };
 
-    int ranking(std::set<int> matchingAds) {
+    File_Queries ranking(std::vector<File_Queries> matchingAds) {
         std::cout << "##Ranking Ads: Count = " << matchingAds.size() << std::endl;
-        double rank;
-        std::set<int>::iterator iter;
+        double rank = 0, tmpRank = 0;
+        File_Queries top, tmp;
+
+        std::vector<File_Queries>::iterator iter;
         for (iter = matchingAds.begin(); iter != matchingAds.end(); ++iter) {
-            rank = getCTRate(*iter) * getOffer(*iter);
+            tmp = *iter;
+            std::cout << "adId: " << tmp.adId << std::endl;
+            // Calc rank
+            tmpRank = getCTRate(atoi(tmp.adId.c_str())) * getOffer(atoi(tmp.adId.c_str()), tmp.phrases);
+            //            std::cout<<"r: "<<rank<<"\tt: "<<tmpRank<<std::endl;
+            if (tmpRank > rank) {
+                top = tmp;
+                rank = tmpRank;
+            }
+            rank = 0;
+            tmpRank = 0;
         }
-        return 1;
+        std::cout << ">>Ranking Top: adId = " << top.adId << "\tphrase = " << top.phrases << "\toffer = " << top.offer << std::endl;
+        return top;
     }
 
-    std::set<int> matching(std::string bidPhrase) {
+    std::vector<File_Queries> matching(std::string bidPhrase) {
         std::cout << "##dbMatching: bidPhrase = " << bidPhrase << std::endl;
-        //        std::vector<File_Queries> results;
-        std::set<int> results;
-        //        std::string id,phrase, offer;
-        int id;
+        std::vector<File_Queries> results;
+        //        std::set<int> results;
+        std::string id, phrase, offer;
+        int offerCompare = 0;
         std::string q = "Select * from Queries where `Bid Phrase`= '" + bidPhrase + "'";
         std::cout << "query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-            cout << "We have: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
-                //                res[i]["AdID"].to_string(id);
-                //                res[i]["Bid Phrase"].to_string(phrase);
-                //                res[i]["Gebot"].to_string(offer);
-                //                File_Queries f(id,phrase,offer);
-                //                results.push_back(f);
-                results.insert(res[i]["AdID"]);
-                std::cout << "AdID = " << res[i]["AdID"] << std::endl;
+                res[i]["AdID"].to_string(id);
+                res[i]["Bid Phrase"].to_string(phrase);
+                res[i]["Gebot"].to_string(offer);
+                File_Queries f(id, phrase, offer);
+                results.push_back(f);
+                //                results.insert(res[i]["AdID"]);
+                //                std::cout << "AdID = " << res[i]["AdID"] << std::endl;
             }
         } else {
             cerr << "Error: " << query.error() << std::endl;
         }
-        std::cout << "Number of matched ads = " << results.size() << std::endl;
-        //        std::cout<<"AdID = "<<id<<"\tPhrase = "<<phrase<<"\tGebot = "<<offer<<std::endl;
+
+        std::cout << ">>Number of matched ads = " << results.size() << std::endl;
         return results;
     }
 
@@ -101,7 +117,7 @@ public:
         std::cout << "CTrate query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-            cout << "We have: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 clicks = res[i]["Anzahl Klicks"];
                 impr = res[i]["Anzahl Impressions"];
@@ -112,12 +128,12 @@ public:
         // CTR calculation
         if (impr != 0)
             rate = (double) clicks / (double) impr;
-        std::cout << "Clicks = " << clicks << "\tImpr = " << impr << "\tCTRate = " << rate << std::endl;
+        std::cout << ">>CTRate: Clicks = " << clicks << "\tImpr = " << impr << "\tCTRate = " << rate << std::endl;
 
         return rate;
     }
-    
-    double getOffer(int adId){
+
+    double getOffer(int adId, std::string phrases) {
         std::cout << "##GetOffer: adId = " << adId << std::endl;
         int offer = 0;
         std::string id = boost::lexical_cast<std::string > (adId);
@@ -125,19 +141,39 @@ public:
         std::cout << "Offer query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-            cout << "We have: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 offer = res[i]["Gebot"];
             }
         } else {
             cerr << "Error: " << query.error() << std::endl;
         }
-        
-        std::cout << "Offer = " << offer<< std::endl;
-        
+
+        std::cout << ">>Got Offer = " << offer << std::endl;
+
         return (double) offer;
     }
-    
+
+    IQueryResult getAd(int adId) {
+        std::cout << "##GetAd: adId = " << adId << std::endl;
+        std::string title, creative;
+        std::string id = boost::lexical_cast<std::string > (adId);
+        std::string q = "Select * from Ads where `AdID`= " + id;
+        std::cout << "Ad query: " << q << std::endl;
+        mysqlpp::Query query = conn.query(q);
+        if (mysqlpp::StoreQueryResult res = query.store()) {
+            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            res[0]["Titel"].to_string(title);
+            res[0]["Slogan"].to_string(creative);
+            IQueryResult ad(title, creative, (uint32_t) adId);
+            std::cout << ">> Ad: \nadId = " << adId << "\ntitle = "<<ad.getTitle()<<"\ncreative = "<<ad.getCreative()<<std::endl;
+            return ad;
+        } else {
+            cerr << "Error: " << query.error() << std::endl;
+        }
+        IQueryResult a;
+        return a;
+    }
 
     std::string getAdURL(uint32_t adID) {
         std::string id = boost::lexical_cast<std::string > (adID);
@@ -162,7 +198,7 @@ public:
         std::string url;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-            cout << "We have: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 res[i]["URL"].to_string(url);
                 break;
@@ -271,15 +307,6 @@ public:
         mysqlpp::Query query = conn.query(q);
         mysqlpp::SimpleResult res = query.execute();
         cout << "Info: " << res.info() << std::endl;
-        //        if (mysqlpp::StoreQueryResult res = query.store()) {
-        //            cout << "We have:" << res.num_rows() << " " << res.num_fields() << endl;
-        //            cout << "FIELD: \t" << res.field_name(0) << '\t' << res.field_name(1) << endl;
-        //            for (size_t i = 0; i < res.num_rows(); ++i) {
-        //                cout << '\t' << res[i]["ID"] << '\t' << res[i]["difficulty"] << endl;
-        //            }
-        //        } else {
-        //            cerr << "Failed to get item list: " << query.error() << endl;
-        //        }
     };
 
 };

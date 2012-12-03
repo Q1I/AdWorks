@@ -13,6 +13,7 @@
 
 class File_Queries {
 public:
+    File_Queries();
     File_Queries(std::vector<std::string> fields);
     File_Queries(std::string,std::string,std::string);
     std::string adId;

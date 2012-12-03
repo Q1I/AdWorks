@@ -38,8 +38,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/IBackEnd.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/File_Ads.o \
-	${OBJECTDIR}/File_Queries.o \
-	${OBJECTDIR}/Interfaces.o
+	${OBJECTDIR}/IQueryResult.o \
+	${OBJECTDIR}/File_Queries.o
 
 
 # C Compiler Flags
@@ -83,15 +83,15 @@ ${OBJECTDIR}/File_Ads.o: File_Ads.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Ads.o File_Ads.cpp
 
+${OBJECTDIR}/IQueryResult.o: IQueryResult.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IQueryResult.o IQueryResult.cpp
+
 ${OBJECTDIR}/File_Queries.o: File_Queries.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Queries.o File_Queries.cpp
-
-${OBJECTDIR}/Interfaces.o: Interfaces.cc 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Interfaces.o Interfaces.cc
 
 # Subprojects
 .build-subprojects:

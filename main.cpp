@@ -3,7 +3,6 @@
 #include <list>
 #include <fstream>
 #include <mysql++.h>
-#include "Interfaces.h"
 #include <algorithm>    // copy
 #include <iterator>     // ostream_operator
 #include <boost/algorithm/string.hpp>
@@ -13,7 +12,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iterator>
-#include "Interfaces.h"
 #include "IBackEnd.cpp"
 //"reload" "resource/ads.csv" "resource/bid_phrases.csv"
 
