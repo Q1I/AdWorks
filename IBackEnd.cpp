@@ -1,4 +1,3 @@
-
 #include <fstream>
 #include <mysql++.h>
 #include <algorithm>    // copy
@@ -53,7 +52,6 @@ public:
             conn.disconnect();
             cout << ">>>>>>>>>>>>>>>> No Ads found! " << std::endl;
             return ad;
-
         }
         // Ranking
         File_Queries fq_ad = ranking(matchingAds);
@@ -106,6 +104,13 @@ public:
         return results;
     }
 
+    /**
+     * Check if ad matches user's information (age, gender).
+     * @param ad
+     * @param gender
+     * @param age
+     * @return true/false
+     */
     bool matchWithUserInformation(File_Queries ad, Gender gender, Age age){
         std::cout << "##matchWithUserInformation: ad = " << ad.adId<<" gender: " <<gender<<" age:"<<age<< std::endl;
 
@@ -148,6 +153,11 @@ public:
         return false;
     }
     
+    /**
+     * Parse gender -> enum to string conversion.
+     * @param g
+     * @return parsed gender string
+     */
     std::string parseGender(int g){
         std::string gender="na";
         if(g==GENDER_NA)
@@ -159,6 +169,11 @@ public:
         return gender;
     }
     
+    /**
+     * Parse age -> enum to string conversion.
+     * @param a
+     * @return parsed age string
+     */
     std::string parseAge(int a){
         std::string age="na";
         if(a==AGE_NA)
@@ -286,6 +301,10 @@ public:
         return a;
     }
 
+    /**
+     * Increment impression of an ad
+     * @param adId
+     */
     void incImpressions(int adId){
         std::string id = boost::lexical_cast<std::string > (adId);
         std::cout << "##Increment Impressions: adId = " << id << std::endl;
@@ -295,6 +314,11 @@ public:
         cout << "Info: " << res.info() << std::endl;
     }
     
+    /**
+     * Get ad and increment its click counter.
+     * @param adID
+     * @return 
+     */
     std::string getAdURL(uint32_t adID) {
         std::string id = boost::lexical_cast<std::string > (adID); // int to string cast
         std::string q = "Select URL from Ads where AdID=" + id;
