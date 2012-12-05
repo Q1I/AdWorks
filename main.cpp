@@ -74,7 +74,7 @@ void matchad(int argc, char **argv) {
     //    queries.insert(queries.end(),query);
     std::string age, gender;
 
-    // -a || -g
+    // Process Arguments: -a || -g || -q
     for (int i = 1; i < argc; i++) {
         if (boost::starts_with(argv[i], "-a")) {
             age = getValue(argv[i+1]);
@@ -120,7 +120,6 @@ int main(int argc, char **argv) {
     
     for(int i=0;i<argc;i++){
         std::cout<<i<<". arg="<<argv[i]<<"."<<std::endl;
-        
     }
     
     if (argc > 1) {

@@ -29,7 +29,7 @@ public:
 
     IQueryResult matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) {
         std::cout << "######MatchAdRewrites" << std::endl;
-        std::cout<<"age: "<<user.getAge()<<"\tgender: "<<user.getGender()<<std::endl;
+        std::cout << "age: " << user.getAge() << "\tgender: " << user.getGender() << std::endl;
         std::string q;
         std::vector<File_Queries> matchingAds;
         IQueryResult ad;
@@ -42,13 +42,14 @@ public:
         for (std::list<std::string>::const_iterator iterator = rewriteList.begin(), end = rewriteList.end(); iterator != end; ++iterator) {
             q = *iterator;
             // Match with bid phrase
-            std::vector<File_Queries> match = matching(q,user.getGender(),user.getAge());
+            std::vector<File_Queries> match = matching(q, user.getGender(), user.getAge());
+            // merge with complete list of matching ads
             matchingAds.insert(matchingAds.end(), match.begin(), match.end());
         }
         cout << ">>>>>>>>>>>>>>>> Matching Result: Found " << matchingAds.size() << " ads" << std::endl;
 
         // If no matches were found, return
-        if(matchingAds.size()==0){
+        if (matchingAds.size() == 0) {
             conn.disconnect();
             cout << ">>>>>>>>>>>>>>>> No Ads found! " << std::endl;
             return ad;
@@ -61,12 +62,11 @@ public:
 
         // Increment Impressions
         incImpressions(atoi(fq_ad.adId.c_str()));
-        
+
         conn.disconnect();
 
         return ad;
     };
-
 
     /**
      * Takes a bidPhrase and returns matched Ads in DB
@@ -83,7 +83,7 @@ public:
         std::cout << "query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-//            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            //            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 // Add results to vector
                 res[i]["AdID"].to_string(id);
@@ -91,8 +91,8 @@ public:
                 res[i]["Gebot"].to_string(offer);
                 File_Queries f(id, phrase, offer);
                 // Check user information
-                if(matchWithUserInformation(f,gender,age))
-                        results.push_back(f);
+                if (matchWithUserInformation(f, gender, age))
+                    results.push_back(f);
                 //                results.insert(res[i]["AdID"]);
                 //                std::cout << "AdID = " << res[i]["AdID"] << std::endl;
             }
@@ -100,7 +100,7 @@ public:
             cerr << "Error: " << query.error() << std::endl;
         }
 
-        std::cout << ">> Number of matched ads for bidPhrase = "<<bidPhrase <<" is "<< results.size() << std::endl;
+        std::cout << ">> Number of matched ads for bidPhrase = " << bidPhrase << " is " << results.size() << std::endl;
         return results;
     }
 
@@ -111,82 +111,82 @@ public:
      * @param age
      * @return true/false
      */
-    bool matchWithUserInformation(File_Queries ad, Gender gender, Age age){
-        std::cout << "##matchWithUserInformation: ad = " << ad.adId<<" gender: " <<gender<<" age:"<<age<< std::endl;
+    bool matchWithUserInformation(File_Queries ad, Gender gender, Age age) {
+        std::cout << "##matchWithUserInformation: ad = " << ad.adId << " gender: " << gender << " age:" << age << std::endl;
 
         std::string id, g, a;
         // Parse age and gender
         g = parseGender(gender);
         a = parseAge(age);
-        std::cout << "Parsed: age = " << a<<" gender: " <<g <<std::endl;
+        std::cout << "Parsed: age = " << a << " gender: " << g << std::endl;
 
         // DB Query
-        std::string q,qAge,qGender;
-        if(a=="na"){
-            qAge="";
-        }else{
-            qAge=" AND (`Age` in ('na','"+a+"') OR `Age` like '%"+a+"%' )";
+        std::string q, qAge, qGender;
+        if (a == "na") {
+            qAge = "";
+        } else {
+            qAge = " AND (`Age` in ('na','" + a + "') OR `Age` like '%" + a + "%' )";
         }
-        if(g=="na"){
-            qGender="";
-        }else{
-            qGender=" AND `Gender` in ('na','"+g+"')";
-        }    
+        if (g == "na") {
+            qGender = "";
+        } else {
+            qGender = " AND `Gender` in ('na','" + g + "')";
+        }
         // complete query
-        q  = "Select * from Ads where `AdID`= '" + ad.adId +
-                "'"+qAge+qGender;
+        q = "Select * from Ads where `AdID`= '" + ad.adId +
+                "'" + qAge + qGender;
         std::cout << "query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-//            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
-            if(res.num_rows()>0){
-                std::cout<<"UInfo success!"<<std::endl;
+            //            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            if (res.num_rows() > 0) {
+                std::cout << "UInfo success!" << std::endl;
                 return true;
-            }else{
-                std::cout<<"UInfo fail!"<<std::endl;
+            } else {
+                std::cout << "UInfo fail!" << std::endl;
                 return false;
             }
         } else {
             cerr << "Error: " << query.error() << std::endl;
         }
-        
+
         return false;
     }
-    
+
     /**
      * Parse gender -> enum to string conversion.
      * @param g
      * @return parsed gender string
      */
-    std::string parseGender(int g){
-        std::string gender="na";
-        if(g==GENDER_NA)
-            gender="na";
-        else if(g==GENDER_MALE)
-            gender="male";
-        else if(g==GENDER_FEMALE)
-            gender="female";
+    std::string parseGender(int g) {
+        std::string gender = "na";
+        if (g == GENDER_NA)
+            gender = "na";
+        else if (g == GENDER_MALE)
+            gender = "male";
+        else if (g == GENDER_FEMALE)
+            gender = "female";
         return gender;
     }
-    
+
     /**
      * Parse age -> enum to string conversion.
      * @param a
      * @return parsed age string
      */
-    std::string parseAge(int a){
-        std::string age="na";
-        if(a==AGE_NA)
-            age="na";
-        else if(a==AGE_OLD)
-            age="old";
-        else if(a==AGE_YOUNG)
-            age="young";
-        else if(a==AGE_TEEN)
-            age="teen";
+    std::string parseAge(int a) {
+        std::string age = "na";
+        if (a == AGE_NA)
+            age = "na";
+        else if (a == AGE_OLD)
+            age = "old";
+        else if (a == AGE_YOUNG)
+            age = "young";
+        else if (a == AGE_TEEN)
+            age = "teen";
         return age;
     }
-    
+
     /**
      * Returns best ranked ad from a vector of ads.
      * @param matchingAds vector of File_Queries
@@ -215,7 +215,7 @@ public:
         std::cout << ">>Ranking Top: adId = " << top.adId << "\tphrase = " << top.phrases << "\toffer = " << top.offer << std::endl;
         return top;
     }
-    
+
     /**
      * Get + calculate CTRate
      * @param adId
@@ -231,7 +231,7 @@ public:
         std::cout << "CTrate query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-//            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            //            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 clicks = res[i]["Anzahl Klicks"];
                 impr = res[i]["Anzahl Impressions"];
@@ -261,7 +261,7 @@ public:
         std::cout << "Offer query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-//            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            //            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 offer = res[i]["Gebot"];
             }
@@ -287,7 +287,7 @@ public:
         std::cout << "Ad query: " << q << std::endl;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-//            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            //            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             // save values to title and creative
             res[0]["Titel"].to_string(title);
             res[0]["Slogan"].to_string(creative);
@@ -305,7 +305,7 @@ public:
      * Increment impression of an ad
      * @param adId
      */
-    void incImpressions(int adId){
+    void incImpressions(int adId) {
         std::string id = boost::lexical_cast<std::string > (adId);
         std::cout << "##Increment Impressions: adId = " << id << std::endl;
         std::string q = "UPDATE Ads SET `Anzahl Impressions`=`Anzahl Impressions`+1 WHERE AdID=" + id;
@@ -313,11 +313,11 @@ public:
         mysqlpp::SimpleResult res = query.execute();
         cout << "Info: " << res.info() << std::endl;
     }
-    
+
     /**
      * Get ad and increment its click counter.
      * @param adID
-     * @return 
+     * @return url
      */
     std::string getAdURL(uint32_t adID) {
         std::string id = boost::lexical_cast<std::string > (adID); // int to string cast
@@ -342,7 +342,7 @@ public:
         std::string url;
         mysqlpp::Query query = conn.query(q);
         if (mysqlpp::StoreQueryResult res = query.store()) {
-//            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
+            //            cout << "query: Rows=" << res.num_rows() << " Fields=" << res.num_fields() << endl;
             for (size_t i = 0; i < res.num_rows(); ++i) {
                 // save value into url
                 res[i]["URL"].to_string(url);
@@ -358,8 +358,12 @@ public:
         mysqlpp::Query query2 = conn.query(q);
         mysqlpp::SimpleResult res = query2.execute();
         std::cout << "Increment Clicks for AdID=" + id << std::endl;
-
+        std::cout<<"Status: "<<res.info()<<std::endl;
+        
         conn.disconnect();
+
+        std::cout << ">>>>>>>>>>>>>>>>> URL: >>>>>>>>>>>>>>>>>>>> \nadId = " << id << std::endl;
+        std::cout << "URL = " << url << std::endl;
 
         return url;
     };
@@ -400,7 +404,7 @@ public:
             }
             myfile.close();
         } else
-            cout << "Error: Open file" << endl;
+            cout << "Error: Couldn't open ad file" << endl;
 
         // Query file
         std::cout << "bidPhraseFile File: " << bidPhraseFile << std::endl;
@@ -427,7 +431,7 @@ public:
             }
             myfile.close();
         } else
-            cout << "Error: Query Open file" << endl;
+            cout << "Error: Couldn't open query file" << endl;
         conn.disconnect();
         return true;
     };
