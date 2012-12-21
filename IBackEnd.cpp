@@ -15,7 +15,7 @@ using namespace std;
 class IBackEnd {
 public:
     // siehe: IFrontEnd::matchAd
-    virtual IQueryResult matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) = 0;
+    virtual IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) = 0;
     // siehe: IFrontEnd::getAdURL
     virtual std::string getAdURL(uint32_t adID) = 0;
     // Datenbank mit Ads und Bid Phrases initialisieren
@@ -27,12 +27,12 @@ public:
     // Connection to mysql database
     mysqlpp::Connection conn;
 
-    IQueryResult matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) {
+    IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) {
         std::cout << "######MatchAdRewrites" << std::endl;
         std::cout << "age: " << user.getAge() << "\tgender: " << user.getGender() << std::endl;
         std::string q;
         std::vector<File_Queries> matchingAds;
-        IQueryResult ad;
+        IQueryResult* ad;
 
         // Connect to db
         if (!this->connect()) {
@@ -279,7 +279,7 @@ public:
      * @param adId
      * @return ad
      */
-    IQueryResult getAd(int adId) {
+    IQueryResult* getAd(int adId) {
         std::cout << "##GetAd: adId = " << adId << std::endl;
         std::string title, creative;
         std::string id = boost::lexical_cast<std::string > (adId);
@@ -291,13 +291,13 @@ public:
             // save values to title and creative
             res[0]["Titel"].to_string(title);
             res[0]["Slogan"].to_string(creative);
-            IQueryResult ad(title, creative, (uint32_t) adId);
-            std::cout << ">>>>>>>>>>>>>>>>> Ad: >>>>>>>>>>>>>>>>>>>> \nadId = " << adId << "\ntitle = " << ad.getTitle() << "\ncreative = " << ad.getCreative() << std::endl;
+            IQueryResult *ad= new IQueryResult(title, creative, (uint32_t) adId);
+            std::cout << ">>>>>>>>>>>>>>>>> Ad: >>>>>>>>>>>>>>>>>>>> \nadId = " << adId << "\ntitle = " << ad->getTitle() << "\ncreative = " << ad->getCreative() << std::endl;
             return ad;
         } else {
             cerr << "Error: " << query.error() << std::endl;
         }
-        IQueryResult a;
+        IQueryResult* a;
         return a;
     }
 
