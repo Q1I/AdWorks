@@ -29,9 +29,9 @@ private:
     std::list<std::string> browsingHistory;
 public:
     IUser(Gender,Age);
-    Gender getGender();
-    Age getAge();
-    std::list<std::string> getBrowsingHistory();
+    Gender getGender() const;
+    Age getAge() const;
+    std::list<std::string> getBrowsingHistory() const;
 };
 
 #endif	/* IUSER_H */

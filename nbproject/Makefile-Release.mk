@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/IBackEnd.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/File_Ads.o \
+	${OBJECTDIR}/IFrontEnd.o \
 	${OBJECTDIR}/IQueryResult.o \
 	${OBJECTDIR}/File_Queries.o \
 	${OBJECTDIR}/IUser.o
@@ -81,6 +82,11 @@ ${OBJECTDIR}/File_Ads.o: File_Ads.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Ads.o File_Ads.cpp
+
+${OBJECTDIR}/IFrontEnd.o: IFrontEnd.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IFrontEnd.o IFrontEnd.cpp
 
 ${OBJECTDIR}/IQueryResult.o: IQueryResult.cpp 
 	${MKDIR} -p ${OBJECTDIR}

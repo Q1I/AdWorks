@@ -6,6 +6,8 @@
                    projectFiles="true">
       <itemPath>File_Ads.h</itemPath>
       <itemPath>File_Queries.h</itemPath>
+      <itemPath>IBackEnd.h</itemPath>
+      <itemPath>IFrontEnd.h</itemPath>
       <itemPath>IQueryResult.h</itemPath>
       <itemPath>IUser.h</itemPath>
     </logicalFolder>
@@ -15,6 +17,8 @@
       <logicalFolder name="resources" displayName="resources" projectFiles="true">
         <itemPath>resources/ads.csv</itemPath>
         <itemPath>resources/bid_phrases.csv</itemPath>
+        <itemPath>resources/clickgraph.csv</itemPath>
+        <itemPath>resources/test.csv</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
@@ -23,6 +27,7 @@
       <itemPath>File_Ads.cpp</itemPath>
       <itemPath>File_Queries.cpp</itemPath>
       <itemPath>IBackEnd.cpp</itemPath>
+      <itemPath>IFrontEnd.cpp</itemPath>
       <itemPath>IQueryResult.cpp</itemPath>
       <itemPath>IUser.cpp</itemPath>
       <itemPath>main.cpp</itemPath>

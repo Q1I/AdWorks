@@ -1,35 +1,15 @@
-#include <fstream>
-#include <mysql++.h>
-#include <algorithm>    // copy
-#include <iterator>     // ostream_operator
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include "IQueryResult.h"
-#include "IUser.h"
-#include "File_Ads.h"
-#include "File_Queries.h"
+#include "IBackEnd.h"
 
 using namespace std;
-
-class IBackEnd {
-public:
-    // siehe: IFrontEnd::matchAd
-    virtual IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) = 0;
-    // siehe: IFrontEnd::getAdURL
-    virtual std::string getAdURL(uint32_t adID) = 0;
-    // Datenbank mit Ads und Bid Phrases initialisieren
-    virtual bool initDatabase(const std::string& adFile, const std::string& bidPhraseFile) = 0;
-};
 
 class BackEnd : public IBackEnd {
 public:
     // Connection to mysql database
     mysqlpp::Connection conn;
 
-    IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, IUser user, bool* foundAd = NULL) {
+    IQueryResult* matchAdRewrites(std::list<std::string> rewriteList, const IUser* user, bool* foundAd = NULL) {
         std::cout << "######MatchAdRewrites" << std::endl;
-        std::cout << "age: " << user.getAge() << "\tgender: " << user.getGender() << std::endl;
+        std::cout << "age: " << user->getAge() << "\tgender: " << user->getGender() << std::endl;
         std::string q;
         std::vector<File_Queries> matchingAds;
         IQueryResult* ad;
@@ -42,7 +22,7 @@ public:
         for (std::list<std::string>::const_iterator iterator = rewriteList.begin(), end = rewriteList.end(); iterator != end; ++iterator) {
             q = *iterator;
             // Match with bid phrase
-            std::vector<File_Queries> match = matching(q, user.getGender(), user.getAge());
+            std::vector<File_Queries> match = matching(q, user->getGender(), user->getAge());
             // merge with complete list of matching ads
             matchingAds.insert(matchingAds.end(), match.begin(), match.end());
         }

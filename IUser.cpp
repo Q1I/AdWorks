@@ -6,15 +6,15 @@ IUser::IUser(Gender gender, Age age) {
     //    this->browsingHistory=bHistory;
 };
 
-Gender IUser::getGender() {
+Gender IUser::getGender() const {
     return this->gender;
 };
 
-Age IUser::getAge() {
+Age IUser::getAge() const{
     return this->age;
 };
 
-std::list<std::string> IUser::getBrowsingHistory() {
+std::list<std::string> IUser::getBrowsingHistory() const{
     return this->browsingHistory;
 };
 
