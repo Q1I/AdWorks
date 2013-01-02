@@ -62,13 +62,13 @@ LDLIBSOPTIONS=/usr/lib/libmysqlpp.so
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ca_2
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ca_2: /usr/lib/libmysqlpp.so
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: /usr/lib/libmysqlpp.so
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ca_2: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ca_2 ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 ${OBJECTDIR}/IBackEnd.o: IBackEnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -111,7 +111,7 @@ ${OBJECTDIR}/IUser.o: IUser.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ca_2
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks
 
 # Subprojects
 .clean-subprojects:
