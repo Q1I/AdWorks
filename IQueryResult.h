@@ -25,41 +25,5 @@ public:
     uint32_t getAdID();
 };
 
-//class IQueryResult {
-//public:
-//    virtual std::string getTitle() const = 0;
-//    virtual std::string getCreative() const = 0;
-//    virtual uint32_t getAdID() const = 0;
-//};
-
-//class QueryResult : public IQueryResult {
-//private:
-//    std::string title;
-//    std::string creative;
-//    uint32_t adId;
-//public:
-//    QueryResult();
-//    QueryResult(std::string,std::string,uint32_t);
-//    std::string getTitle();
-//
-//    std::string getCreative();
-//
-//    uint32_t getAdID();
-//};
-
-
-//class QueryResult : public IQueryResult {
-//private:
-//    std::string title;
-//    std::string creative;
-//    uint32_t adId;
-//public:
-//    std::string getTitle();
-//
-//    std::string getCreative();
-//
-//    uint32_t getAdID();
-//};
-
 #endif	/* IQUERYRESULT_H */
 

@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <iterator>
 #include "IUser.h"
-#include "IFrontEnd.cpp"
+#include "IFrontEnd.h"
 
 //"matchad" "-q Bahn" "-q zUG" "-q tablet" "-a na" "-g na"
 //matchad -q Bahn -q zUG -q tablet -a na -g na
@@ -173,6 +173,4 @@ int main(int argc, char **argv) {
         else
             std::cout << "Unknown CMD" << std::endl;
     }
-    
-    load_click_data(argc, argv);
 }
