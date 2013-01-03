@@ -117,12 +117,16 @@ public:
      */
     bool connect();
 
+    bool checkDB();
+    
+    bool createDB();
     /**
      * Execute insert query.
      * @param q insert statement
      */
     void dbInsert(std::string q);
 
+     mysqlpp::Connection getConnection();
 };
 
 #endif	/* IBACKEND_H */

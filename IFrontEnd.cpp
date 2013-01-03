@@ -82,6 +82,7 @@ bool FrontEnd::analyzeClickGraph(const std::string& file) {
         std::cout << "QueriesIndex: " << queriesIndex.size() << std::endl;
         std::cout << "AdsIndex: " << adsIndex.size() << std::endl;
 
+        // simrank
         simrank();
 
     } else
@@ -102,9 +103,9 @@ bool FrontEnd::analyzeDemographicFeatures(const std::string &userFile, const std
 
 // setze das zu verwendende Backend
 
-void FrontEnd::setBackend(IBackEnd* backend) {
+void FrontEnd::setBackend(BackEnd* backend) {
     std::cout << "FE: Set Backend." << std::endl;
-    this->backEnd = backend;
+    this->backEnd = (BackEnd*) backend;
 }
 
 int FrontEnd::getIndexQuery(std::string query) {
@@ -204,11 +205,24 @@ void FrontEnd::simrank() {
         msg = "Calculated with Simrank";
     std::cout << "################## Top 5 Sim for a query #################" << std::endl;
     std::cout << msg << std::endl;
+    if(!this->backEnd->connect())
+            return;
+    // truncate simrank
+    this->backEnd->dbInsert("TRUNCATE TABLE `Simrank`");
     for (int i = 0; i < queriesIndex.size(); i++) {
         std::cout << queriesIndex.at(i) << " : " << std::endl;
         getTop5(i);
     }
 }
+
+// sort
+struct less_than
+{
+    inline bool operator() (const SIM_RANK& struct1, const SIM_RANK& struct2)
+    {
+        return (struct1.simrank > struct2.simrank);
+    }
+};
 
 void FrontEnd::getTop5(int pos) {
     std::vector<SIM_RANK> rank;
@@ -240,9 +254,29 @@ void FrontEnd::getTop5(int pos) {
             }
         }
         rank.erase(rank.begin() + posMin);
+        
+        // sort
+        std::sort(rank.begin(), rank.end(), less_than());
     }
     for (int i = 0; i < rank.size(); i++)
         std::cout << "\t" << rank.at(i).query << " = " << rank.at(i).simrank << std::endl;
+    
+    // insert into db
+    std::cout<<"Insert top 5 into db"<<std::endl;
+    std::string q = "INSERT IGNORE INTO Simrank VALUES ('"+queriesIndex.at(pos)+"','"+
+            rank.at(0).query + "'," + boost::lexical_cast<std::string>(rank.at(0).simrank)+ ",'" +
+            rank.at(1).query+"',"+boost::lexical_cast<std::string>(rank.at(1).simrank)+",'"+
+            rank.at(2).query+"',"+boost::lexical_cast<std::string>(rank.at(2).simrank)+",'"+
+            rank.at(3).query+"',"+boost::lexical_cast<std::string>(rank.at(3).simrank)+",'"+
+            rank.at(4).query+"',"+boost::lexical_cast<std::string>(rank.at(4).simrank)+")";
+//    std::cout<<"Query: "<<q<<std::endl;
+    this->backEnd->dbInsert(q);
+    
+    for (int i = 0; i < rank.size(); i++){
+        std::cout << "\t" << rank.at(i).query << " = " << rank.at(i).simrank << std::endl;
+        
+        
+    }
 }
 
 boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrank(int n) {

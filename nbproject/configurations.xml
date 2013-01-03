@@ -18,6 +18,7 @@
         <itemPath>resources/ads.csv</itemPath>
         <itemPath>resources/bid_phrases.csv</itemPath>
         <itemPath>resources/clickgraph.csv</itemPath>
+        <itemPath>resources/schema.sql</itemPath>
         <itemPath>resources/test.csv</itemPath>
       </logicalFolder>
     </logicalFolder>

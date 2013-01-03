@@ -11,7 +11,7 @@
 #include "IQueryResult.h"
 #include "IUser.h"
 #include "IBackEnd.h"
-
+#include <algorithm>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -29,7 +29,7 @@ public:
     // Webseiten
     virtual bool analyzeDemographicFeatures(const std::string &userFile, const std::string& visitFile) = 0;
     // setze das zu verwendende Backend
-    virtual void setBackend(IBackEnd* backend) = 0;
+    virtual void setBackend(BackEnd* backend) = 0;
 };
 
 
@@ -50,7 +50,7 @@ enum Mode {
 
 class FrontEnd : public IFrontEnd {
 private:
-    IBackEnd* backEnd;
+    BackEnd* backEnd;
     std::vector<std::string> queriesIndex;
     std::vector<std::string> adsIndex;
     std::vector<entry> clickGraph; // clickgraph
@@ -79,7 +79,7 @@ public:
 
     // setze das zu verwendende Backend
 
-    void setBackend(IBackEnd* backend);
+    void setBackend(BackEnd* backend);
 
     int getIndexQuery(std::string query);
 

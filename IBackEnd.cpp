@@ -300,7 +300,7 @@ std::string BackEnd::getAdURL(uint32_t adID) {
     // Get Connection to mysql
     std::cout << "Open Connection ..." << std::endl;
     try {
-        if (conn.connect("CA", "localhost", "root", "root"))
+        if (conn.connect("Adworks", "localhost", "root", "root"))
             std::cout << "Connection success." << std::endl;
         else {
             std::cout << "Connection failed." << std::endl;
@@ -345,6 +345,12 @@ bool BackEnd::initDatabase(const std::string& adFile, const std::string& bidPhra
     using namespace boost;
 
     std::cout << "######InitDatabase ..." << std::endl;
+
+    // Check if db exists
+    if (!checkDB())
+        if(!createDB())
+            return false;
+    
     // Get Connection to mysql
     if (!connect())
         return false;
@@ -416,7 +422,7 @@ bool BackEnd::initDatabase(const std::string& adFile, const std::string& bidPhra
 bool BackEnd::connect() {
     std::cout << "Open Connection ..." << std::endl;
     try {
-        if (conn.connect("CA", "localhost", "root", "root"))
+        if (conn.connect("Adworks", "localhost", "root", "root"))
             std::cout << "Connection success." << std::endl;
         else {
             std::cout << "Connection failed." << std::endl;
@@ -429,6 +435,83 @@ bool BackEnd::connect() {
     return true;
 };
 
+/** 
+ * Connect to database 
+ * @return connecting-> success or fail
+ */
+bool BackEnd::checkDB() {
+    std::cout << "Check if db exists..." << std::endl;
+    mysqlpp::Connection connection;
+    try {
+        if (connection.connect("", "localhost", "root", "root")) {
+                std::cout << "Connected to mysql server: " << std::endl;
+            std::string q = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'Adworks'";
+            
+            mysqlpp::Query query = connection.query(q);
+            std::cout << "query" << std::endl;
+            mysqlpp::StoreQueryResult result = query.store();
+            if(result.size()>0){
+                std::cout << "Db 'Adworks' does exist." << std::endl;
+                return true;
+            } else {
+                std::cout << "Db doesn't exist." << std::endl;
+                return false;
+            }
+        } else {
+            std::cout << "Couldn't connect to mysql database!" << std::endl;
+
+        }
+    } catch (mysqlpp::Exception e) {
+        std::cerr << "problem: " << e.what() << std::endl;
+        return -1;
+    }
+    return false;
+};
+
+/** 
+ * Create db 
+ * @return creation-> success or fail
+ */
+bool BackEnd::createDB() {
+    std::cout << "Create DB" << std::endl;
+    try {
+        mysqlpp::Connection connection;
+        if (connection.connect("", "localhost", "root", "root"))
+            std::cout << "Read sql file" << std::endl;
+        std::string q = "";
+        std::ifstream myfile;
+        myfile.open("resources/schema.sql");
+        std::string line;
+        if (myfile.is_open()) {
+            std::cout << "File opened" << std::endl;
+            while (myfile.good()) {
+                getline(myfile, line);
+                q += line;
+            }
+            myfile.close();
+
+            std::cout << "split q: "<<q << std::endl;
+            std::vector<std::string> stmts;
+            boost::split(stmts, q, boost::is_any_of(";"));
+            std::cout<<"Stmts size: "<<stmts.size()<<std::endl;
+            
+            for(int i=0;i<stmts.size();i++){
+            // Execute query
+            mysqlpp::Query query = connection.query(stmts.at(i));
+            
+            mysqlpp::SimpleResult res = query.execute();
+            std::cout << "Info: " << res.info() << std::endl;
+            }
+            return true;
+        } else
+            std::cout << "Error: Couldn't open SQL Schema file" << std::endl;
+    } catch (mysqlpp::Exception e) {
+        std::cerr << "problem: " << e.what() << std::endl;
+        return -1;
+    }
+    return false;
+};
+
 /**
  * Execute insert query.
  * @param q insert statement
@@ -439,4 +522,8 @@ void BackEnd::dbInsert(std::string q) {
     mysqlpp::SimpleResult res = query.execute();
     std::cout << "Info: " << res.info() << std::endl;
 };
+
+ mysqlpp::Connection BackEnd::getConnection(){
+     return conn;
+ }
 
