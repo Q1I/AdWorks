@@ -126,7 +126,7 @@ public:
      */
     void dbInsert(std::string q);
 
-     mysqlpp::Connection getConnection();
+     mysqlpp::Connection* getConnection();
 };
 
 #endif	/* IBACKEND_H */

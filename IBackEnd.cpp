@@ -228,7 +228,7 @@ double BackEnd::getCTRate(int adId) {
  */
 double BackEnd::getOffer(int adId, std::string phrases) {
     std::cout << "##GetOffer: adId = " << adId << std::endl;
-    int offer = 0;
+    double offer = 0;
     std::string id = boost::lexical_cast<std::string > (adId);
     std::string q = "Select `Gebot` from Queries where `AdID`= " + id;
     std::cout << "Offer query: " << q << std::endl;
@@ -244,7 +244,7 @@ double BackEnd::getOffer(int adId, std::string phrases) {
 
     std::cout << ">>Got Offer = " << offer << std::endl;
 
-    return (double) offer;
+    return offer;
 }
 
 /**
@@ -523,7 +523,7 @@ void BackEnd::dbInsert(std::string q) {
     std::cout << "Info: " << res.info() << std::endl;
 };
 
- mysqlpp::Connection BackEnd::getConnection(){
-     return conn;
+ mysqlpp::Connection* BackEnd::getConnection(){
+     return &conn;
  }
 
