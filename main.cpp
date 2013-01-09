@@ -170,7 +170,14 @@ int main(int argc, char **argv) {
             query(argc, argv);
         else if (argv[1] == clickDataStr)
             load_click_data(argc, argv);
-        else
+        else{
             std::cout << "Unknown CMD" << std::endl;
+            std::cout << "List of CMDs:\n----------------------------"
+                    "\nInit DB: \t\treload <ads_file.csv> <bid_phrase_file.csv>"
+                    "\nLoad Click Data: \tload_click_data <clickgraph.csv>"
+                    "\nSimrank MatchAd: \tquery <query>"
+                    "\nMatchAd: \t\tmatchad -q <query> -q <query> ... -a <age> -g <gender>"
+                    "\nGetAdUrl: \t\tvisit <id>" << std::endl;
+        }
     }
 }

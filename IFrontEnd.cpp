@@ -10,16 +10,17 @@ IQueryResult* FrontEnd::matchAd(std::string query, const IUser*
     std::cout << "conn: " << std::endl;
     
      // get similar queries from db
-    std::string q = "SELECT Query_1,Query_2,Query_3,Query_4,Query_5 FROM Simrank WHERE Query like '%" + query + "%'";
+    std::string q = "SELECT Query,Query_1,Query_2,Query_3,Query_4,Query_5 FROM Simrank WHERE Query like '%" + query + "%'";
     std::cout << "Query: " << q << std::endl;
     mysqlpp::Query sqlQuery = this->backEnd->getConnection()->query(q);
     if (mysqlpp::StoreQueryResult res = sqlQuery.store()) {
         if (res.num_rows() > 0) {
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 6; i++) {
                 queries.insert(queries.end(), res[0][i].c_str());
                 std::cout << i << ".RES: " << res[0][i] << std::endl;
             }
-        }else{
+        }
+        else{
             queries.insert(queries.end(),query);
         }
 
@@ -40,30 +41,27 @@ bool FrontEnd::analyzeClickGraph(const std::string & file) {
     std::cout << "FE: analyzeClickGraph" << std::endl;
     totalClicks = 0;
     maxClicks = 0;
+    
     // Read file
     std::cout << "FE: Read file " << file << std::endl;
     std::ifstream myfile;
     myfile.open(file.c_str());
-    //                myfile.open("resources/test.csv");
+//                    myfile.open("resources/test.csv");
     //        myfile.open("resources/clickgraph.csv");
     std::string line;
     std::vector <std::string> fields;
-    std::set<std::string> queries, ads;
-
+    std::set<std::string> queries, ads; // using set for unique elements
     if (myfile.is_open()) {
         std::cout << "File opened" << std::endl;
         while (myfile.good()) {
-            //                std::cout << "Get Line" << std::endl;
             getline(myfile, line);
             if (boost::starts_with(line, "#")) {
                 std::cout << "Starts with #" << std::endl;
                 continue;
             }
             // Split line delimiter='\t', save elements into fields
-            //                std::cout << "split... " << line << std::endl;
             boost::split(fields, line, boost::is_any_of("\t"));
             //                std::cout << "field.size: " << fields.size() << std::endl;
-
             if (fields.size() != 3)
                 continue;
 
@@ -74,19 +72,20 @@ bool FrontEnd::analyzeClickGraph(const std::string & file) {
             e.ad = fields.at(2);
             clickGraph.insert(clickGraph.end(), e);
 
-            // insert into totalClicks for calculating probability 
-            totalClicks += e.click;
-            if (e.click > maxClicks) {
-                maxClicks = e.click;
-            }
             // insert into queries
             queries.insert(e.query);
             // insert into ads
             ads.insert(e.ad);
+            
+            // insert into totalClicks for calculating probability/ maxClick for scaling matrix
+            totalClicks += e.click;
+            if (e.click > maxClicks) {
+                maxClicks = e.click;
+            }            
         }
         myfile.close();
 
-        // Index: copy set into list
+        // Prepare Index: copy ads set and queries set into lists
         std::cout << "ClickGraph: " << clickGraph.size() << std::endl;
         std::cout << "Queries: " << queries.size() << std::endl;
         std::cout << "Ads: " << ads.size() << std::endl;
@@ -156,7 +155,7 @@ void FrontEnd::simrank() {
     int n = queriesIndex.size() + adsIndex.size();
 
     // P matrix
-    //        matrix<double> P = transitionMatrixSimrank(n); // simrank
+//            matrix<double> P = transitionMatrixSimrank(n); // simrank // here
     matrix<double> P = transitionMatrixSimrankPP(n); // simrank++
 
     // I Matrix
@@ -175,15 +174,15 @@ void FrontEnd::simrank() {
 
     // calc simrank
     std::cout << "Calculate Simrank" << std::endl;
-    int k = 5;
+    int k = 6;
     double c = 0.8;
     for (int i = 1; i < k; i++) {
         std::cout << i << ".temp: " << temp.size1() << "," << temp.size2() << "\tP: " << P.size1() << "," << P.size2() << "\tS: " << S.size1() << "," << S.size2() << std::endl;
         temp = prod(PT, S);
         temp = c * prod(temp, P);
         // diag
-        for (int i = 0; i < n; i++) {
-            diag(i, i) = temp(i, i);
+        for (int s = 0; s < n; s++) {
+            diag(s, s) = temp(s, s);
         }
         //            std::cout << "diag:\n"<<diag << std::endl;
         S = temp + I - diag;
@@ -197,23 +196,21 @@ void FrontEnd::simrank() {
                 double sum = 0;
                 for (int k = 1; k <= countSameNeighbours(P, i, j); ++k)
                     sum += 1.0 / (pow(2, k));
-                if (sum == 0) {
-                    v(i, j) = 0.25;
-                } else
-                    v(i, j) = sum;
+                v(i, j) = sum;
             }
         }
         // multiply with evidence matrix
-        for (unsigned int i = 0; i < S.size1(); i++)
-            for (unsigned int j = 0; j < S.size2(); j++) {
-                if (i == j) {
-                    S(i, j) = 1;
-                    continue;
-                }
+        for ( int i = 0; i < S.size1(); i++)
+            for ( int j = 0; j < S.size2(); j++) {
                 S(i, j) = S(i, j) * v(i, j);
             }
     }
 
+    // Set diagonal of S to 1
+    for(int i=0;i<n;i++){
+        S(i,i)=1;
+    }
+    
     std::cout << "Simrank Matrix:\n" << S << std::endl;
 
     // Output
@@ -232,6 +229,8 @@ void FrontEnd::simrank() {
         std::cout << queriesIndex.at(i) << " : " << std::endl;
         getTop5(i);
     }
+    std::cout << msg << std::endl;
+    
 }
 
 // sort
@@ -262,7 +261,7 @@ void FrontEnd::getTop5(int pos) {
         for (int i = 0; i < rank.size(); i++) {
             //                std::cout<<i<<".tmp: query = "<<tmp.query<<" sim = "<<tmp.simrank<<std::endl;
             tmp = rank.at(i);
-            if (tmp.simrank == 1) { // erase trivial ( simrank = 1)
+            if (tmp.simrank == 1 ) { // erase trivial ( simrank = 1)
                 posMin = i;
                 min = tmp.simrank;
                 break;
@@ -291,11 +290,10 @@ void FrontEnd::getTop5(int pos) {
     //    std::cout<<"Query: "<<q<<std::endl;
     this->backEnd->dbInsert(q);
 
-    for (int i = 0; i < rank.size(); i++) {
-        std::cout << "\t" << rank.at(i).query << " = " << rank.at(i).simrank << std::endl;
-
-
-    }
+//    for (int i = 0; i < rank.size(); i++) {
+//        std::cout << "\t" << rank.at(i).query << " = " << rank.at(i).simrank << std::endl;
+//
+//    }
 }
 
 boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrank(int n) {
@@ -335,6 +333,8 @@ boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrank(int n) {
     for (int j = 0; j < n; j++) {
         float sum = 0;
         for (int i = 0; i < n; i++) {
+//            if(i==j)
+//                P(i,j)=0;
             sum += P(i, j);
         }
         for (int i = 0; i < n; i++) {
@@ -373,14 +373,25 @@ boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrankPP(int n)
             continue;
         }
         // set scaled weight
-        P(posQuery, queriesIndex.size() + posAd) = tmp.click / maxClicks;
-        P(queriesIndex.size() + posAd, posQuery) = tmp.click / maxClicks;
+        P(posQuery, queriesIndex.size() + posAd) = tmp.click ;
+        P(queriesIndex.size() + posAd, posQuery) = tmp.click ;
     }
-    std::cout << "P' (scaled transition Matrix):\n" << P << std::endl;
+    std::cout << "P' (transition Matrix):\n" << P << std::endl;
 
+    // Normalize
+    for (int j = 0; j < n; j++) {
+        float sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += P(i, j);
+        }
+        for (int i = 0; i < n; i++) {
+            P(i, j) /= sum;
+        }
+    }
+    
     // copy P
     matrix<double> Pcopy = P;
-    // calac weight P
+    // calc weight P
     for (int a = 0; a < n; a++) {
         float sum = 0;
         for (int i = 0; i < n; i++) {
@@ -416,12 +427,9 @@ double FrontEnd::spread(boost::numeric::ublas::matrix_column<boost::numeric::ubl
     for (int i = 0; i < col.size(); i++) {
         if (col(i) != 0) {
             expectation += col(i) * probability.at(i);
-            //                expectation += col(i);
-            //                c++;
         }
     }
-    //        expectation = expectation/c;
-
+    
     // Varianz
     double variance = 0;
     int count = 0;
@@ -430,11 +438,8 @@ double FrontEnd::spread(boost::numeric::ublas::matrix_column<boost::numeric::ubl
         if (col(i) != 0) {
             count++;
             variance += std::pow((col(i) - expectation), 2) * probability.at(i);
-            //                variance += pow((col(i) - expectation), 2) ;
-            //                std::cout << "variance: " << variance << " exp: " << expectation << " col: " << col(i) << " prob: " << probability.at(i) << " count: " << count << std::endl;
         }
     }
-    //                variance = variance/count;
 
     // Spread
     double spread = exp(variance * (-1.0));
