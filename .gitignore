@@ -1,2 +1,4 @@
 build/
 dist/
+resources/lda-input/
+resources/lda-output/

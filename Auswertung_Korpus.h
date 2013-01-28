@@ -17,6 +17,14 @@
 #include <sstream>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <set>
+#include <ctype.h>
+#include "IBackEnd.h"
+
+struct LDA_VAL {
+    int pos;
+    double val;
+};
 
 class Auswertung_Korpus {
 public:
@@ -25,12 +33,25 @@ public:
     virtual ~Auswertung_Korpus();
 
     static const std::string LDA_INPUT_FILE;
+    static const std::string LDA_OUTPUT_FILE;
+    
+    static const std::string stopWords[]; 
     void readCorpusFiles(boost::filesystem::path &korpus);
     void readCorpusFiles(std::string korpuspfad);
-    void writeFile(std::string filename, std::vector<std::string> words, std::vector<int> counts);
+    void writeFile(std::string filename, std::vector<int> words, std::vector<int> counts);
     void countWords(std::vector<std::string> words);
+    void addToWordSet(std::vector<std::string> words);
+    void createWordIndex();
+    int getIndex(std::string word);
+    void processLDA();
+    void dbUpdate();
+    void setBackend(BackEnd* backend);
+    void top10(std::vector<std::string> val,int cluster);
+    bool checkWord(std::string word);
 private:
-
+    std::set<std::string> wordSet;
+    std::vector<std::string> wordIndex;
+    BackEnd* backEnd;
 };
 
 #endif	/* AUSWERTUNG_KORPUS_H */

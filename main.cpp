@@ -160,11 +160,12 @@ void performLDA(int argc, char **argv) {
 
     //    f.performLDA(argv[2]);
     boost::filesystem::path korpus_files = "resources/korpus"; //argv[2];
-
+//
     Auswertung_Korpus* auswertung = new Auswertung_Korpus();
+    auswertung->setBackend(b);
     auswertung->readCorpusFiles(korpus_files);
-    //    std::system("lda est 0.01 40 settings.txt tmpfile-lda.txt random foo/");
-
+        std::system("./lda est 0.08 40 lda-settings.txt resources/lda-input/lda-input.txt seeded resources/lda-output/");
+        auswertung->processLDA();
 }
 
 int main(int argc, char **argv) {
