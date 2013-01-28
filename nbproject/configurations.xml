@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>Auswertung_Korpus.h</itemPath>
       <itemPath>File_Ads.h</itemPath>
       <itemPath>File_Queries.h</itemPath>
       <itemPath>IBackEnd.h</itemPath>
@@ -25,6 +26,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>Auswertung_Korpus.cpp</itemPath>
       <itemPath>File_Ads.cpp</itemPath>
       <itemPath>File_Queries.cpp</itemPath>
       <itemPath>IBackEnd.cpp</itemPath>
@@ -54,12 +56,14 @@
           <incDir>
             <pElem>/usr/include/mysql++</pElem>
             <pElem>/usr/include/mysql</pElem>
-            <pElem>../../opt/boost_1_52_0</pElem>
+            <pElem>../../opt/boost_1_40_0</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
           <linkerLibItems>
             <linkerLibFileItem>/usr/lib/libmysqlpp.so</linkerLibFileItem>
+            <linkerLibFileItem>/usr/lib/libboost_regex.so</linkerLibFileItem>
+            <linkerLibFileItem>/usr/lib/libboost_filesystem.so</linkerLibFileItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

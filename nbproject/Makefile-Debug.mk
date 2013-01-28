@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/IBackEnd.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/Auswertung_Korpus.o \
 	${OBJECTDIR}/File_Ads.o \
 	${OBJECTDIR}/IFrontEnd.o \
 	${OBJECTDIR}/IQueryResult.o \
@@ -58,13 +59,17 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=/usr/lib/libmysqlpp.so
+LDLIBSOPTIONS=/usr/lib/libmysqlpp.so /usr/lib/libboost_regex.so /usr/lib/libboost_filesystem.so
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: /usr/lib/libmysqlpp.so
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: /usr/lib/libboost_regex.so
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: /usr/lib/libboost_filesystem.so
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -73,37 +78,42 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/adworks: ${OBJECTFILES}
 ${OBJECTDIR}/IBackEnd.o: IBackEnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IBackEnd.o IBackEnd.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IBackEnd.o IBackEnd.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/Auswertung_Korpus.o: Auswertung_Korpus.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Auswertung_Korpus.o Auswertung_Korpus.cpp
 
 ${OBJECTDIR}/File_Ads.o: File_Ads.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Ads.o File_Ads.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Ads.o File_Ads.cpp
 
 ${OBJECTDIR}/IFrontEnd.o: IFrontEnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IFrontEnd.o IFrontEnd.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IFrontEnd.o IFrontEnd.cpp
 
 ${OBJECTDIR}/IQueryResult.o: IQueryResult.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IQueryResult.o IQueryResult.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IQueryResult.o IQueryResult.cpp
 
 ${OBJECTDIR}/File_Queries.o: File_Queries.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Queries.o File_Queries.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Queries.o File_Queries.cpp
 
 ${OBJECTDIR}/IUser.o: IUser.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_52_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IUser.o IUser.cpp
+	$(COMPILE.cc) -g -I/usr/include/mysql++ -I/usr/include/mysql -I../../opt/boost_1_40_0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/IUser.o IUser.cpp
 
 # Subprojects
 .build-subprojects:
