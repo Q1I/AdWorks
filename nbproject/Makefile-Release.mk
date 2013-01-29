@@ -37,8 +37,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/IBackEnd.o \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/Auswertung_Korpus.o \
 	${OBJECTDIR}/File_Ads.o \
+	${OBJECTDIR}/Auswertung_Korpus.o \
 	${OBJECTDIR}/IFrontEnd.o \
 	${OBJECTDIR}/IQueryResult.o \
 	${OBJECTDIR}/File_Queries.o \
@@ -79,15 +79,15 @@ ${OBJECTDIR}/main.o: main.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
 
-${OBJECTDIR}/Auswertung_Korpus.o: Auswertung_Korpus.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Auswertung_Korpus.o Auswertung_Korpus.cpp
-
 ${OBJECTDIR}/File_Ads.o: File_Ads.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/File_Ads.o File_Ads.cpp
+
+${OBJECTDIR}/Auswertung_Korpus.o: Auswertung_Korpus.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Auswertung_Korpus.o Auswertung_Korpus.cpp
 
 ${OBJECTDIR}/IFrontEnd.o: IFrontEnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}

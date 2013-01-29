@@ -8,8 +8,8 @@ IQueryResult* FrontEnd::matchAd(std::string query, const IUser*
     if (!this->backEnd->connect())
         return NULL;
     std::cout << "conn: " << std::endl;
-    
-     // get similar queries from db
+
+    // get similar queries from db
     std::string q = "SELECT Query,Query_1,Query_2,Query_3,Query_4,Query_5 FROM Simrank WHERE Query like '%" + query + "%'";
     std::cout << "Query: " << q << std::endl;
     mysqlpp::Query sqlQuery = this->backEnd->getConnection()->query(q);
@@ -19,9 +19,8 @@ IQueryResult* FrontEnd::matchAd(std::string query, const IUser*
                 queries.insert(queries.end(), res[0][i].c_str());
                 std::cout << i << ".RES: " << res[0][i] << std::endl;
             }
-        }
-        else{
-            queries.insert(queries.end(),query);
+        } else {
+            queries.insert(queries.end(), query);
         }
 
         this->backEnd->matchAdRewrites(queries, user, NULL);
@@ -41,12 +40,12 @@ bool FrontEnd::analyzeClickGraph(const std::string & file) {
     std::cout << "FE: analyzeClickGraph" << std::endl;
     totalClicks = 0;
     maxClicks = 0;
-    
+
     // Read file
     std::cout << "FE: Read file " << file << std::endl;
     std::ifstream myfile;
     myfile.open(file.c_str());
-//                    myfile.open("resources/test.csv");
+    //                    myfile.open("resources/test.csv");
     //        myfile.open("resources/clickgraph.csv");
     std::string line;
     std::vector <std::string> fields;
@@ -76,12 +75,12 @@ bool FrontEnd::analyzeClickGraph(const std::string & file) {
             queries.insert(e.query);
             // insert into ads
             ads.insert(e.ad);
-            
+
             // insert into totalClicks for calculating probability/ maxClick for scaling matrix
             totalClicks += e.click;
             if (e.click > maxClicks) {
                 maxClicks = e.click;
-            }            
+            }
         }
         myfile.close();
 
@@ -155,7 +154,7 @@ void FrontEnd::simrank() {
     int n = queriesIndex.size() + adsIndex.size();
 
     // P matrix
-//            matrix<double> P = transitionMatrixSimrank(n); // simrank // here
+    //            matrix<double> P = transitionMatrixSimrank(n); // simrank // here
     matrix<double> P = transitionMatrixSimrankPP(n); // simrank++
 
     // I Matrix
@@ -200,17 +199,17 @@ void FrontEnd::simrank() {
             }
         }
         // multiply with evidence matrix
-        for ( int i = 0; i < S.size1(); i++)
-            for ( int j = 0; j < S.size2(); j++) {
+        for (int i = 0; i < S.size1(); i++)
+            for (int j = 0; j < S.size2(); j++) {
                 S(i, j) = S(i, j) * v(i, j);
             }
     }
 
     // Set diagonal of S to 1
-    for(int i=0;i<n;i++){
-        S(i,i)=1;
+    for (int i = 0; i < n; i++) {
+        S(i, i) = 1;
     }
-    
+
     std::cout << "Simrank Matrix:\n" << S << std::endl;
 
     // Output
@@ -230,7 +229,7 @@ void FrontEnd::simrank() {
         getTop5(i);
     }
     std::cout << msg << std::endl;
-    
+
 }
 
 // sort
@@ -261,7 +260,7 @@ void FrontEnd::getTop5(int pos) {
         for (int i = 0; i < rank.size(); i++) {
             //                std::cout<<i<<".tmp: query = "<<tmp.query<<" sim = "<<tmp.simrank<<std::endl;
             tmp = rank.at(i);
-            if (tmp.simrank == 1 ) { // erase trivial ( simrank = 1)
+            if (tmp.simrank == 1) { // erase trivial ( simrank = 1)
                 posMin = i;
                 min = tmp.simrank;
                 break;
@@ -290,10 +289,10 @@ void FrontEnd::getTop5(int pos) {
     //    std::cout<<"Query: "<<q<<std::endl;
     this->backEnd->dbInsert(q);
 
-//    for (int i = 0; i < rank.size(); i++) {
-//        std::cout << "\t" << rank.at(i).query << " = " << rank.at(i).simrank << std::endl;
-//
-//    }
+    //    for (int i = 0; i < rank.size(); i++) {
+    //        std::cout << "\t" << rank.at(i).query << " = " << rank.at(i).simrank << std::endl;
+    //
+    //    }
 }
 
 boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrank(int n) {
@@ -333,8 +332,8 @@ boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrank(int n) {
     for (int j = 0; j < n; j++) {
         float sum = 0;
         for (int i = 0; i < n; i++) {
-//            if(i==j)
-//                P(i,j)=0;
+            //            if(i==j)
+            //                P(i,j)=0;
             sum += P(i, j);
         }
         for (int i = 0; i < n; i++) {
@@ -373,8 +372,8 @@ boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrankPP(int n)
             continue;
         }
         // set scaled weight
-        P(posQuery, queriesIndex.size() + posAd) = tmp.click ;
-        P(queriesIndex.size() + posAd, posQuery) = tmp.click ;
+        P(posQuery, queriesIndex.size() + posAd) = tmp.click;
+        P(queriesIndex.size() + posAd, posQuery) = tmp.click;
     }
     std::cout << "P' (transition Matrix):\n" << P << std::endl;
 
@@ -388,7 +387,7 @@ boost::numeric::ublas::matrix<double> FrontEnd::transitionMatrixSimrankPP(int n)
             P(i, j) /= sum;
         }
     }
-    
+
     // copy P
     matrix<double> Pcopy = P;
     // calc weight P
@@ -429,7 +428,7 @@ double FrontEnd::spread(boost::numeric::ublas::matrix_column<boost::numeric::ubl
             expectation += col(i) * probability.at(i);
         }
     }
-    
+
     // Varianz
     double variance = 0;
     int count = 0;
@@ -470,3 +469,67 @@ int FrontEnd::countSameNeighbours(boost::numeric::ublas::matrix<double> P, int i
     return count;
 }
 
+void FrontEnd::performLDA(const std::string & file) {
+    Auswertung_Korpus* auswertung = new Auswertung_Korpus();
+    auswertung->setBackend(this->backEnd);
+    boost::filesystem::path path(file);
+    auswertung->readCorpusFiles(path);
+    std::system("./lda est 0.1 40 lda-settings.txt resources/lda-input/lda-input.txt seeded resources/lda-output/");
+    auswertung->processLDA();
+}
+
+IQueryResult* FrontEnd::matchAdLDA(std::string query, const IUser*
+        user, bool*) {
+    // cluster list
+    std::vector<std::string> clusters;
+
+    // Rewrite query
+    std::list<std::string> queries;
+
+    std::set<std::string> unique;
+
+    if (!this->backEnd->connect())
+        return NULL;
+    std::cout << "conn: " << std::endl;
+
+    // get cluster from db
+    std::string q = "SELECT Cluster FROM LDA WHERE Term like '%" + query + "%'";
+    std::cout << "Cluster Query: " << q << std::endl;
+    mysqlpp::Query sqlQuery = this->backEnd->getConnection()->query(q);
+    if (mysqlpp::StoreQueryResult res = sqlQuery.store()) {
+        if (res.num_rows() > 0) {
+            for (int i = 0; i < res.num_rows(); i++) {
+                clusters.insert(clusters.end(), res[i][0].c_str());
+                std::cout << i << ".RES: " << res[i][0] << std::endl;
+            }
+        } else { // no cluster found
+            queries.insert(queries.end(), query);
+            this->backEnd->matchAdRewrites(queries, user, NULL);
+            return NULL;
+        }
+    }
+
+    // get terms
+    std::string termQuery = "SELECT Term FROM LDA WHERE Cluster in (";
+    for (int i = 0; i < clusters.size(); i++) {
+        termQuery += (std::string) clusters.at(i);
+        if (i != clusters.size() - 1)
+            termQuery += " , ";
+    }
+    termQuery += ")";
+    std::cout << "Term Query: " << termQuery << std::endl;
+    mysqlpp::Query sqlTermQuery = this->backEnd->getConnection()->query(termQuery);
+    if (mysqlpp::StoreQueryResult res = sqlTermQuery.store()) {
+        if (res.num_rows() > 0) {
+            for (int i = 0; i < res.num_rows(); i++) {
+                unique.insert(res[i][0].c_str());
+                std::cout << i << ".RES: " << res[i][0] << std::endl;
+            }
+        }
+    }
+
+    // copy unique into queries list
+    std::copy(unique.begin(), unique.end(), std::back_inserter(queries));
+
+    this->backEnd->matchAdRewrites(queries, user, NULL);
+}

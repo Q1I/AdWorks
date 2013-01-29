@@ -19,17 +19,18 @@ Auswertung_Korpus::~Auswertung_Korpus() {
 const std::string Auswertung_Korpus::LDA_INPUT_FILE = "resources/lda-input/lda-input.txt";
 const std::string Auswertung_Korpus::LDA_OUTPUT_FILE = "resources/lda-output/final.beta";
 
-const std::string Auswertung_Korpus::stopWords[] = 
-{"Der", "Die", "Das", 
-"Ich", "Du", "Er", "Sie", "Es", "Wir", 
-"Was", "Wer", "Wann", "Wo", "Wie", 
-"Ein", "Eine", "Einer", "Einem",
-"In","Aus","Von","Zu","Bei"
-"Da","Dort",
-"Und"};
+const std::string Auswertung_Korpus::stopWords[] ={"Der", "Die", "Das",
+    "Ich", "Du", "Er", "Sie", "Es", "Wir",
+    "Was", "Wer", "Wann", "Wo", "Wie",
+    "Ein", "Eine", "Einer", "Einem",
+    "In", "Aus", "Von", "Zu", "Bei"
+    "Da", "Dort",
+    "Und", "So", "Nach",
+    "War", "Ist", "Sind",
+    "Ach"}; //31 words
 
 void Auswertung_Korpus::readCorpusFiles(boost::filesystem::path &korpus) {
-    // als erstes Remove old lda_input file, damit wir nicht text an alte lda-input-datei ranhaengen
+    // Remove old lda_input file
     if (std::remove(this->LDA_INPUT_FILE.c_str()) != 0)
         perror("Error deleting file");
     else
@@ -40,48 +41,12 @@ void Auswertung_Korpus::readCorpusFiles(boost::filesystem::path &korpus) {
         std::cerr << "Dieser Ordner existiert nicht!" << std::endl;
     }
 
+    // Iterate through folder and process each file
     std::vector<std::string> words;
     if (boost::filesystem::is_directory(korpus)) {
         boost::filesystem::directory_iterator end;
 
-        // addToWordSet
-        for (boost::filesystem::directory_iterator iter(korpus); iter != end; ++iter) {
-            std::cout << ">>Current Position: " << iter->path() << std::endl;
-            std::ostringstream fileName;
-            fileName << iter->path();
-            std::ifstream reader;
-            reader.open(fileName.str().c_str());
-            //                        reader.open("resources/korpus/test.txt");
-            std::string buffer;
-            std::string all;
-            if (reader.is_open()) {
-                std::cout << "File opened" << std::endl;
-                while (reader.good()) {
-                    getline(reader, buffer); // buffer bekommt jedes mal neuen wert -> zeile wird nichtan buffer gehangen
-                    // all is der string mit dem kompletten text der datei
-                    all += buffer;
-                    //                    std::cout << "Eingelesen: " << buffer << std::endl;
-                }
-
-                // split
-                boost::algorithm::split(words, all, boost::is_any_of("[.,?!; \t\n]"), boost::algorithm::token_compress_on);
-
-                reader.close();
-            } else {
-                std::cerr << "Unable to open " << fileName.str().c_str() << std::endl;
-            }
-            addToWordSet(words);
-            //            countWords(words);
-
-
-            words.clear();
-            //                        break;
-        }
-
-        // create unique wordList
-        createWordIndex();
-
-        // count
+        // addToWordSet (WordSet = unique words)
         for (boost::filesystem::directory_iterator iter(korpus); iter != end; ++iter) {
             std::cout << ">>Current Position: " << iter->path() << std::endl;
             std::ostringstream fileName;
@@ -104,26 +69,54 @@ void Auswertung_Korpus::readCorpusFiles(boost::filesystem::path &korpus) {
             } else {
                 std::cerr << "Unable to open " << fileName.str().c_str() << std::endl;
             }
+            addToWordSet(words);
+            words.clear();
+            reader.close();
+        }
+
+        // create and prepare index for words -> ordered list of unique words
+        createWordIndex();
+
+        // count words
+        for (boost::filesystem::directory_iterator iter(korpus); iter != end; ++iter) {
+            std::cout << ">>Current Position: " << iter->path() << std::endl;
+            std::ostringstream fileName;
+            fileName << iter->path();
+            std::ifstream reader;
+            reader.open(fileName.str().c_str());
+            std::string buffer;
+            std::string all;
+            if (reader.is_open()) {
+                std::cout << "File opened" << std::endl;
+                while (reader.good()) {
+                    getline(reader, buffer);
+                    all += buffer;
+                }
+                // split
+                boost::algorithm::split(words, all, boost::is_any_of("[.,?!; \t\n]"), boost::algorithm::token_compress_on);
+
+                reader.close();
+            } else {
+                std::cerr << "Unable to open " << fileName.str().c_str() << std::endl;
+            }
+            // count words of current doc and write into lda-input file with format: [M] [t1]:[c1] ... \n
             countWords(words);
             words.clear();
-            //                        break;
         }
     }
 
     std::cout << ">>>Done reading file" << std::endl;
-    std::cout << ">>>All words: " << wordIndex.size() << std::endl;
+    std::cout << ">>># of all words: " << wordIndex.size() << std::endl;
 }
 
 void Auswertung_Korpus::createWordIndex() {
+    std::cout << ">> Create wordIndex" << std::endl;
     std::set<std::string>::iterator it;
     for (it = wordSet.begin(); it != wordSet.end(); it++) {
         wordIndex.insert(wordIndex.end(), *it);
     }
-
     // sort ..extra
     std::sort(wordIndex.begin(), wordIndex.end());
-
-    std::cout << "wordIndex size=" << wordIndex.size() << "\n================================\n\n" << std::endl;
 }
 
 void Auswertung_Korpus::addToWordSet(std::vector<std::string> words) {
@@ -148,29 +141,29 @@ int Auswertung_Korpus::getIndex(std::string word) {
 void Auswertung_Korpus::countWords(std::vector<std::string> words) {
     std::cout << "countWords: words size=" << words.size() << std::endl;
 
-    // unique words list for this document -> provides index
+    // unique word list for THIS document -> provides index
     std::vector <std::string> uniqueWords;
+    // list of global indexes of these words
     std::vector <int> uniqueWordsIndex;
 
-    // create uniqueWords with string
+    // create uniqueWords = list witch string values
     std::set <std::string> tmp;
     for (int i = 0; i < words.size(); i++)
-        if (checkWord(words.at(i))) // longer than 1 and capital 
+        if (checkWord(words.at(i)))
             tmp.insert(tmp.end(), words.at(i));
     std::set<std::string>::iterator it;
     for (it = tmp.begin(); it != tmp.end(); it++) {
         uniqueWords.insert(uniqueWords.end(), *it);
     }
 
-    // create unieuqWordsIndex with int (psoition in gloabal index)
+    // create unieuqWordsIndex = list with int values (position in gloabal index)
     for (int i = 0; i < uniqueWords.size(); i++) {
         uniqueWordsIndex.insert(uniqueWordsIndex.end(), getIndex(uniqueWords.at(i)));
     }
     std::cout << "uWordsIndex size = " << uniqueWordsIndex.size() << std::endl;
 
-    // occurence counter 
+    // occurrence counter 
     std::vector <int> counter(uniqueWords.size());
-    // count
     for (int i = 0; i < uniqueWords.size(); i++) {
         for (int j = 0; j < words.size(); j++) {
             if (uniqueWords.at(i) == words.at(j)) {
@@ -178,7 +171,6 @@ void Auswertung_Korpus::countWords(std::vector<std::string> words) {
             }
         }
     }
-
 
     //    for (std::vector<std::string>::iterator it = uniqueWords.begin(); it != uniqueWords.end(); it++) {
     //        std::cout << *it << std::endl;
@@ -194,6 +186,7 @@ void Auswertung_Korpus::countWords(std::vector<std::string> words) {
     std::cout << "uniqueWordsIndex size=" << uniqueWordsIndex.size() << std::endl;
     std::cout << "counter size=" << counter.size() << std::endl;
 
+    // write to file
     writeFile(this->LDA_INPUT_FILE, uniqueWordsIndex, counter);
 }
 
@@ -204,18 +197,19 @@ void Auswertung_Korpus::writeFile(std::string filename, std::vector<int> words, 
     if (lda_input.is_open() != true) {
         std::cerr << "Unable to open " << filename << std::endl;
     }
-    //zeichen schreiben
+    // size [M]
     lda_input << words.size() << " ";
+    // term [t_i] : count [c_i] 
     for (int i = 0; i < counts.size(); i++) {
         lda_input << words.at(i) << ":" << counts[i] << " ";
     }
     lda_input << std::endl;
     lda_input.close();
 
-    for (int i = 0; i < words.size(); i++) {
-        if (counts.at(i) > 1)
-            std::cout << wordIndex.at(words.at(i)) << " : " << counts.at(i) << std::endl;
-    }
+//    for (int i = 0; i < words.size(); i++) {
+//        if (counts.at(i) > 1)
+//            std::cout << wordIndex.at(words.at(i)) << " : " << counts.at(i) << std::endl;
+//    }
 
     std::cout << "write done" << std::endl;
 }
@@ -226,13 +220,14 @@ void Auswertung_Korpus::setBackend(BackEnd * backend) {
 }
 
 void Auswertung_Korpus::processLDA() {
-
+    // cluster
+    int cluster = 0;
+    
     // read final.beta
     std::ifstream reader;
     reader.open(this->LDA_OUTPUT_FILE.c_str());
     std::string buffer;
     std::vector<std::string> val;
-    int cluster = 0;
     if (reader.is_open()) {
         std::cout << "File opened" << std::endl;
 
@@ -248,7 +243,6 @@ void Auswertung_Korpus::processLDA() {
             if (val.at(0).size() < 1) {
                 val.erase(val.begin());
             }
-            std::cerr << "val size: " << val.size() << std::endl;
 
             if (val.size() > 0) {
                 // get Top 10
@@ -275,31 +269,35 @@ struct less_than {
 void Auswertung_Korpus::top10(std::vector<std::string> val, int cluster) {
 
     std::vector<LDA_VAL> lda;
-
+    double tmp;
     for (int i = 0; i < val.size(); i++) {
+        tmp = atof(val.at(i).c_str()); // loga of proba
         LDA_VAL l;
         l.pos = i;
-        l.val = atof(val.at(i).c_str());
+        l.val = exp(tmp); // umwandeln
         lda.insert(lda.end(), l);
     }
 
     // sort
     std::sort(lda.begin(), lda.end(), less_than());
 
-    // top 10
-    std::cout << "Cluster "<<cluster<<". Insert QUERY:\n" <<std::endl;
+    // insert top 10 into db
+    std::cout << "Cluster " << cluster << ". Insert QUERY:\n" << std::endl;
     std::string query = "";
     for (int i = 0; i < 10; i++) {
+//        std::cout << i<<". " << lda.at(i).val <<std::endl;
         query += "INSERT INTO LDA VALUES('";
-        query += wordIndex.at(lda.at(i).pos);
+        query += wordIndex.at(lda.at(i).pos); // get word as string from index
         query += "',";
-        query += boost::lexical_cast<std::string > (cluster);
+        query += boost::lexical_cast<std::string > (cluster); // cluster
+        query += ",";
+        query += boost::lexical_cast<std::string > (lda.at(i).val); // cluster
         query += ");";
         std::cout << query << std::endl;
         this->backEnd->dbInsert(query);
-        query="";
+        query = "";
     }
-    
+
 }
 
 void Auswertung_Korpus::dbUpdate() {
@@ -308,12 +306,12 @@ void Auswertung_Korpus::dbUpdate() {
 
 bool Auswertung_Korpus::checkWord(std::string word) {
     bool ok = false;
-    // size and uppercase
+    // check for size and uppercase
     if ((word.size() > 1) && (std::isupper(word[0])))
         ok = true;
-    // stopp word
-
-    for (int i = 0; i < 25; i++) { // size of array
+    
+    // stop word
+    for (int i = 0; i < 31; i++) { // size of array
         if (stopWords[i] == word)
             return false;
     }

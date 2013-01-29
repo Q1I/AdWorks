@@ -11,6 +11,7 @@
 #include "IQueryResult.h"
 #include "IUser.h"
 #include "IBackEnd.h"
+#include "Auswertung_Korpus.h"
 #include <algorithm>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -100,6 +101,11 @@ public:
     std::vector<double> calcProbability(boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> > col);
 
     int countSameNeighbours(boost::numeric::ublas::matrix<double> P, int i, int j);
+    
+    void performLDA(const std::string &file);
+    
+    IQueryResult* matchAdLDA(std::string query, const IUser*
+            user=NULL, bool* foundAd=NULL);
 };
 #endif	/* IFRONTEND_H */
 

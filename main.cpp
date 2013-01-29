@@ -158,14 +158,25 @@ void performLDA(int argc, char **argv) {
     FrontEnd f;
     f.setBackend(b);
 
-    //    f.performLDA(argv[2]);
-    boost::filesystem::path korpus_files = "resources/korpus"; //argv[2];
-//
-    Auswertung_Korpus* auswertung = new Auswertung_Korpus();
-    auswertung->setBackend(b);
-    auswertung->readCorpusFiles(korpus_files);
-        std::system("./lda est 0.08 40 lda-settings.txt resources/lda-input/lda-input.txt seeded resources/lda-output/");
-        auswertung->processLDA();
+    //    boost::filesystem::path korpus_files = "resources/korpus"; //argv[2];
+    //    f.performLDA("resources/korpus");
+    f.performLDA(argv[2]);
+    //
+
+}
+
+void queryLDA(int argc, char **argv) {
+    std::cout << "#LDA Query: argc= " << argc << std::endl;
+    if (argc > 3) {
+        std::cout << "Too many arguments!" << std::endl;
+        return;
+    }
+    std::cout << "query: " << argv[2] << std::endl;
+    IUser* user = new IUser(GENDER_NA, AGE_NA);
+    BackEnd* b = new BackEnd();
+    FrontEnd f;
+    f.setBackend(b);
+    f.matchAdLDA(argv[2], user, NULL);
 }
 
 int main(int argc, char **argv) {
@@ -176,14 +187,15 @@ int main(int argc, char **argv) {
     std::string queryStr = "query";
     std::string clickDataStr = "load_click_data";
     std::string ldaStr = "performLDA";
+    std::string queryLdaStr = "queryLDA";
 
     for (int i = 0; i < argc; i++) {
         std::cout << i << ". arg=" << argv[i] << "." << std::endl;
     }
 
     // test -----------------------------------
-    performLDA(argc, argv);
-
+    //    performLDA(argc, argv);
+    //    queryLDA(argc, argv);
 
     if (argc > 1) {
         std::cout << "Checking command .. " << std::endl;
@@ -199,6 +211,8 @@ int main(int argc, char **argv) {
             load_click_data(argc, argv);
         else if (argv[1] == ldaStr)
             performLDA(argc, argv);
+        else if (argv[1] == queryLdaStr)
+            query(argc, argv);
         else {
             std::cout << "Unknown CMD" << std::endl;
             std::cout << "List of CMDs:\n----------------------------"
@@ -207,7 +221,8 @@ int main(int argc, char **argv) {
                     "\nSimrank MatchAd: \tquery <query>"
                     "\nMatchAd: \t\tmatchad -q <query> -q <query> ... -a <age> -g <gender>"
                     "\nGetAdUrl: \t\tvisit <id>"
-                    "\nPerform LDA: \t\tperformLDA <folder>" << std::endl;
+                    "\nPerform LDA: \t\tperformLDA <folder>"
+                    "\nSimrank MatchAdLDA: \tqueryLDA <query>" << std::endl;
         }
     }
 }
